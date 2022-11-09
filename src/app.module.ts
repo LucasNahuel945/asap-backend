@@ -1,33 +1,34 @@
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { dbconfig } from './dbconfig';
+
 import {
   MenuModule,
   MenuTipoModule,
   PerfilModule,
   UsuarioModule,
-  Menu,
-  MenuTipo,
-  Perfil,
-  Usuario,
 } from './modules';
+
+import databaseConfig from './database.config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...dbconfig,
-      entities: [
-        Perfil,
-        Usuario,
-        Menu,
-        MenuTipo,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => config.get<TypeOrmModuleOptions>('database.config'),
     }),
-    PerfilModule,
-    UsuarioModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [databaseConfig],
+      envFilePath: process.env.NODE_ENV
+        ? `.${process.env.NODE_ENV}.env`
+        : '.development.env',
+    }),
     MenuModule,
     MenuTipoModule,
+    PerfilModule,
+    UsuarioModule,
   ],
 })
+
 export class AppModule {}
