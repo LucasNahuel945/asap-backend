@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   
-  const port = parseInt(config.get<string>('SERVER_PORT'), 10) || 3006;
+  const port = parseInt(process.env.PORT) || parseInt(config.get<string>('PORT')) || 3006;
   
   const options = new DocumentBuilder()
     .setTitle('API REST de Prueba')
